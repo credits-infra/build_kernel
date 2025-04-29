@@ -1,4 +1,4 @@
-name: Build flashable kernel (MIUI/HyperOS star)
+name: Build flashable kernel (MIUI/HyperOS star test)
 
 on:
   workflow_dispatch:
