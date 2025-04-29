@@ -1,0 +1,53 @@
+name: Build flashable kernel (MIUI/HyperOS star)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Kernel Source Code
+      uses: actions/checkout@v3
+      with:
+        github-server-url: 'https://github.com'
+        repository: EndCredits/android_kernel_xiaomi_sm8350-miui
+        ref: new-rebase
+        path: kernel-srcroot
+    
+    - name: Setup Build Environment
+      run: |
+        sudo apt-get -y update
+        sudo apt-get install git-core gnupg flex bison build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 libncurses5 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig p7zip-full python3 cpio
+
+    - name: Setup Nathan Slim Clang
+      run: |
+        mkdir ./toolchain
+        cd ./toolchain
+        curl -o llvm-18.tar.gz https://mirrors.edge.kernel.org/pub/tools/llvm/files/llvm-18.1.8-x86_64.tar.gz
+        tar -xvf llvm-18.tar.gz
+        TARGET_CLANG_PATH="$(pwd)/$(find ./ -name "bin")"
+        echo "TARGET_CLANG_PATH=${TARGET_CLANG_PATH}" > $GITHUB_ENV
+
+    - name: Setup Kernel SU
+      run: |
+        cd kernel-srcroot
+        git submodule init
+        git submodule update --checkout
+
+    - name: Build Kernel for star
+      run: |
+        cd kernel-srcroot
+        PATH=${{ env.TARGET_CLANG_PATH }}/:$PATH
+        clang --version
+
+        bash build.sh all star
+
+        echo "TARGET_KERNEL_FLASHABLE_NAME=$(ls ../out/anykernel/ | grep Hana)" >> $GITHUB_ENV
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.TARGET_KERNEL_FLASHABLE_NAME }}
+        path: out/anykernel/Hana-kernel-*
