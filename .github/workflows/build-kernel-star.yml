@@ -47,7 +47,7 @@ jobs:
         echo "TARGET_KERNEL_FLASHABLE_NAME=$(ls ../out/anykernel/ | grep Hana)" >> $GITHUB_ENV
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.TARGET_KERNEL_FLASHABLE_NAME }}
         path: out/anykernel/Hana-kernel-*
