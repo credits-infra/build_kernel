@@ -1,0 +1,43 @@
+name: Build flashable kernel (MIUI/HyperOS star with GCC)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Kernel Source Code
+      uses: actions/checkout@v3
+      with:
+        github-server-url: 'https://github.com'
+        repository: EndCredits/android_kernel_xiaomi_sm8350-miui
+        ref: new-rebase
+        path: kernel-srcroot
+    
+    - name: Setup Build Environment
+      run: |
+        sudo apt-get -y update
+        sudo apt-get install git-core gnupg flex bison build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 libncurses-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig p7zip-full python3 cpio gcc gcc-arm-linux-gnueabi gcc-aarch64-linux-gnu
+
+    - name: Setup Kernel SU
+      run: |
+        cd kernel-srcroot
+        git submodule init
+        git submodule update --checkout
+
+    - name: Build Kernel for star
+      run: |
+        cd kernel-srcroot
+        gcc --version
+
+        bash build.sh all star 1
+
+        echo "TARGET_KERNEL_FLASHABLE_NAME=$(ls ../out/anykernel/ | grep Hana)" >> $GITHUB_ENV
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.TARGET_KERNEL_FLASHABLE_NAME }}
+        path: out/anykernel/Hana-kernel-*
