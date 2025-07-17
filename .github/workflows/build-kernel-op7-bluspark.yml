@@ -1,0 +1,50 @@
+name: Build flashable kernel (AOSP picasso)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Kernel Source Code
+      uses: actions/checkout@v3
+      with:
+        github-server-url: 'https://github.com'
+        repository: engstk/op7
+        ref: blu_spark-10
+        path: kernel-srcroot
+    
+    - name: Setup Build Environment
+      run: |
+        sudo apt-get -y update
+        sudo apt-get install git-core gnupg flex bison build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 libncurses-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig p7zip-full python3 cpio
+
+    - name: Setup Proton Clang
+      run: |
+        mkdir ./toolchain
+        cd ./toolchain
+        git clone https://github.com/kdrag0n/proton-clang --depth=1 proton-clang
+        TARGET_CLANG_PATH="$(pwd)/$(find ./proton-clang -name "bin")"
+        echo "TARGET_CLANG_PATH=${TARGET_CLANG_PATH}" > $GITHUB_ENV
+
+    - name: Build Kernel for op7
+      run: |
+        cd kernel-srcroot
+        PATH=${{ env.TARGET_CLANG_PATH }}/:$PATH
+        clang --version
+
+        make ARCH=arm64 CC=clang CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- O=../out -j$(nproc --all) blu_spark_defconfig
+
+        make ARCH=arm64 CC=clang CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- O=../out -j$(nproc --all) 
+
+        ls ../out/arch/arm64/boot/
+
+        echo "TARGET_KERNEL_FLASHABLE_NAME=$(ls ../out/arch/arm64/boot/ | grep Image)" >> $GITHUB_ENV
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.TARGET_KERNEL_FLASHABLE_NAME }}
+        path: out/arch/arm64/boot/Image
