@@ -1,4 +1,4 @@
-name: Build flashable kernel (AOSP picasso)
+name: Build flashable kernel (OOS OP7)
 
 on:
   workflow_dispatch:
