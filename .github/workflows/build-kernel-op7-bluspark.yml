@@ -21,11 +21,17 @@ jobs:
         sudo apt-get -y update
         sudo apt-get install git-core gnupg flex bison build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 libncurses-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig p7zip-full python3 cpio
 
+    - name: Download proton clang
+      uses: actions/checkout@v3
+      with:
+        github-server-url: 'https://github.com'
+        repository: kdrag0n/proton-clang
+        ref: new-rebase
+        path: toolchains/proton-clang
+
     - name: Setup Proton Clang
       run: |
-        mkdir ./toolchain
-        cd ./toolchain
-        git clone https://github.com/kdrag0n/proton-clang --depth=1 proton-clang
+        cd toolchains/
         TARGET_CLANG_PATH="$(pwd)/$(find ./proton-clang -name "bin")"
         echo "TARGET_CLANG_PATH=${TARGET_CLANG_PATH}" > $GITHUB_ENV
 
