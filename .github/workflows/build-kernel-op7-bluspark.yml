@@ -26,7 +26,7 @@ jobs:
       with:
         github-server-url: 'https://github.com'
         repository: kdrag0n/proton-clang
-        ref: new-rebase
+        ref: master
         path: toolchains/proton-clang
 
     - name: Setup Proton Clang
