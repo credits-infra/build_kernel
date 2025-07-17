@@ -32,7 +32,7 @@ jobs:
     - name: Setup Proton Clang
       run: |
         cd toolchains/
-        TARGET_CLANG_PATH="$(pwd)/$(find ./proton-clang -name "bin")"
+        TARGET_CLANG_PATH="$(pwd)/proton-clang/bin"
         echo "TARGET_CLANG_PATH=${TARGET_CLANG_PATH}" > $GITHUB_ENV
 
     - name: Build Kernel for op7
