@@ -1,0 +1,45 @@
+
+name: Build flashable kernel (AOSP jason)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Kernel Source Code
+      uses: actions/checkout@v3
+      with:
+        github-server-url: 'https://github.com'
+        repository: ProjectLUO/android_kernel_xiaomi_sdm660
+        ref: lineage-21-4.4-original-disp
+        path: kernel-srcroot
+    
+    - name: Setup Build Environment
+      run: |
+        sudo apt-get -y update
+        sudo apt-get install git-core gnupg flex bison build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 libncurses-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig p7zip-full python3 cpio
+
+    - name: Build Kernel for jason
+      run: |
+        cd kernel-srcroot
+        bash build.sh
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.TARGET_BOOT_IMAGE }}
+        path: ${{ env.TARGET_BOOT_IMAGE }}
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ env.BUILD_DATE }}
+        name: "AOSP Kernel Build for jason ${{ env.BUILD_DATE }}"
+        body: |
+          Automated build kernel for jason.
+        files: ${{ env.TARGET_BOOT_IMAGE }}
+        draft: false
+        prerelease: false
