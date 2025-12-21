@@ -12,11 +12,10 @@ jobs:
 
     steps:
     - name: Checkout Kernel Source Code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
       with:
-        github-server-url: 'https://github.com'
         repository: ProjectLUO/android_kernel_xiaomi_sdm660
-        ref: lineage-21-4.4-original-disp
+        ref: lineage-21-4.4
         path: kernel-srcroot
     
     - name: Setup Build Environment
